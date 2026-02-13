@@ -29,7 +29,7 @@ const SubjectsList = () => {
                 accessorKey: 'code',
                 size: 100,
                 header: () => <p className="column-title ml-2">Code</p>,
-                cell: ({ getValue }) => <Badge>{getValue<String>()}</Badge>
+                cell: ({ getValue }) => <Badge>{getValue<string>()}</Badge>
             },
             {
                 id: 'name',
@@ -75,7 +75,7 @@ const SubjectsList = () => {
             <h1 className="page-title">Subjects</h1>
 
             <div className="intro-row">
-                <p>Quick access to essential metrics and managment tools.</p>
+                <p>Quick access to essential metrics and management tools.</p>
 
                 <div className="actions-row">
                     <div className="search-field">
@@ -93,7 +93,7 @@ const SubjectsList = () => {
                     <div className="flex gap-2 w-full sm:w-auto">
                         <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
                             <SelectTrigger>
-                                <SelectValue placeholder="Filter by deparment"/>
+                                <SelectValue placeholder="Filter by department"/>
                             </SelectTrigger>
 
                             <SelectContent>
