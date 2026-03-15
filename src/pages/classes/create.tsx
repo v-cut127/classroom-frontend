@@ -92,7 +92,7 @@ const ClassesCreate = () => {
     const subjectsLoading = subjectsQuery.isLoading;
 
     const bannerPublicId = form.watch('bannerCldPubId')
-    const setBannerImage = (file, field) => {
+    const setBannerImage = (file: any, field: any) => {
         if(file){
             field.onChange(file.url);
             form.setValue('bannerCldPubId', file.publicId, {
@@ -147,7 +147,7 @@ const ClassesCreate = () => {
                                                     value={field.value ? {url:
                                                     field.value, publicId:
                                                     bannerPublicId ?? ''} : null}
-                                                    onChange={(file: any, field: any) =>
+                                                    onChange={(file: any) =>
                                                         setBannerImage(file, field)}
                                                 />
                                             </FormControl>
