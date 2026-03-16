@@ -53,6 +53,7 @@ const ClassesCreate = () => {
         control,
     } = form;
 
+    const bannerPublicId = form.watch("bannerCldPubId");
 
     const onSubmit = async (values: z.infer<typeof classSchema>) => {
         try {
@@ -91,24 +92,6 @@ const ClassesCreate = () => {
     const subjects = subjectsQuery.data?.data || [];
     const subjectsLoading = subjectsQuery.isLoading;
 
-    const bannerPublicId = form.watch('bannerCldPubId')
-    const setBannerImage = (file: any, field: any) => {
-        if(file){
-            field.onChange(file.url);
-            form.setValue('bannerCldPubId', file.publicId, {
-                shouldValidate: true,
-                shouldDirty: true,
-            })
-        }
-        else{
-            field.onChange('');
-            form.setValue('bannerCldPubId', '', {
-                shouldValidate: true,
-                shouldDirty: true,
-            })
-        }
-    }
-
     return (
         <CreateView className="class-view">
             <Breadcrumb />
@@ -140,20 +123,40 @@ const ClassesCreate = () => {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>
-                                                Banner Image<span className="text-orange-600">*</span>
+                                                Banner Image <span className="text-orange-600">*</span>
                                             </FormLabel>
                                             <FormControl>
                                                 <UploadWidget
-                                                    value={field.value ? {url:
-                                                    field.value, publicId:
-                                                    bannerPublicId ?? ''} : null}
-                                                    onChange={(file: any) =>
-                                                        setBannerImage(file, field)}
+                                                    value={
+                                                        field.value
+                                                            ? {
+                                                                url: field.value,
+                                                                publicId: bannerPublicId ?? "",
+                                                            }
+                                                            : null
+                                                    }
+                                                    onChange={(file: any) => {
+                                                        if (file) {
+                                                            field.onChange(file.url);
+                                                            form.setValue("bannerCldPubId", file.publicId, {
+                                                                shouldValidate: true,
+                                                                shouldDirty: true,
+                                                            });
+                                                        } else {
+                                                            field.onChange("");
+                                                            form.setValue("bannerCldPubId", "", {
+                                                                shouldValidate: true,
+                                                                shouldDirty: true,
+                                                            });
+                                                        }
+                                                    }}
                                                 />
                                             </FormControl>
-                                            <FormMessage/>
+                                            <FormMessage />
                                             {errors.bannerCldPubId && !errors.bannerUrl && (
-                                                <p className="text-destructive text-sm">{errors.bannerCldPubId.message?.toString()}</p>
+                                                <p className="text-destructive text-sm">
+                                                    {errors.bannerCldPubId.message?.toString()}
+                                                </p>
                                             )}
                                         </FormItem>
                                     )}
