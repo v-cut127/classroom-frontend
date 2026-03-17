@@ -17,19 +17,29 @@ const options: CreateDataProviderOptions = {
             const params: Record<string, string|number> = { page, limit: pageSize};
 
             filters?.forEach((filter) => {
-                const field = 'field' in filter ? filter.field : '';
+                if ('field' in filter && 'value' in filter && filter.value !== undefined && filter.value !== null) {
+                    const field = filter.field;
+                    const value = String(filter.value);
 
-                const value = String(filter.value);
+                    if(resource === 'subjects'){
+                        if(field === 'department') params.department = value;
+                        if(field === 'name' || field === 'code') params.search = value;
+                    }
 
-                if(resource === 'subjects'){
-                    if(field === 'department') params.department = value;
-                    if(field === 'name' || field === 'code') params.search = value;
-                }
+                    if(resource === 'classes'){
+                        if(field === 'name') params.search = value;
+                        if(field === 'subject') params.subject = value;
+                        if(field === 'teacher') params.teacher = value;
+                    }
 
-                if(resource === 'classes'){
-                    if(field === 'name') params.search = value;
-                    if(field === 'subject') params.subject = value;
-                    if(field === 'teacher') params.teacher = value;
+                    if(resource === 'users'){
+                        if(field === 'name' || field === 'email') params.search = value;
+                        if(field === 'role') params.role = value;
+                    }
+
+                    if(resource === 'departments'){
+                        if(field === 'name' || field === 'code') params.search = value;
+                    }
                 }
             })
 
@@ -37,16 +47,13 @@ const options: CreateDataProviderOptions = {
         },
 
         mapResponse: async (response) => {
-            const payload: ListResponse = await response.clone().json();
+            const payload: ListResponse = await response.json();
 
-            return payload.data ?? [];
+            return {
+                data: payload.data ?? [],
+                total: payload.pagination?.total ?? payload.data?.length ?? 0
+            };
         },
-
-        getTotalCount: async (response) => {
-            const payload: ListResponse = await response.clone().json();
-
-            return payload.pagination?.total ?? payload.data?.length ?? 0;
-        }
     },
 
     create:{
@@ -57,7 +64,7 @@ const options: CreateDataProviderOptions = {
         mapResponse: async (response) => {
             const json: CreateResponse = await response.json();
 
-            return json.data ?? [];
+            return { data: json.data ?? [] };
         }
     },
 
@@ -67,7 +74,7 @@ const options: CreateDataProviderOptions = {
         mapResponse: async (response) => {
             const json: GetOneResponse = await response.json();
 
-            return json.data ?? [];
+            return { data: json.data ?? [] };
         }
     }
 }

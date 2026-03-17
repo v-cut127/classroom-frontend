@@ -13,13 +13,16 @@ import { useNotificationProvider } from "./components/refine-ui/notification/use
 import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
 import { dataProvider } from "./providers/data.ts";
 import Dashboard from "@/pages/dashboard.tsx";
-import {BookOpen, GraduationCap, Home} from 'lucide-react';
 import {Layout} from "@/components/refine-ui/layout/layout.tsx";
 import SubjectsList from "@/pages/subjects/list.tsx";
 import SubjectsCreate from "@/pages/subjects/create.tsx";
+import DepartmentsList from "@/pages/departments/list.tsx";
+import DepartmentsCreate from "@/pages/departments/create.tsx";
+import UsersList from "@/pages/users/list.tsx";
 import ClassesList from "@/pages/classes/list.tsx";
 import ClassesCreate from "@/pages/classes/create.tsx";
 import ClassesShow from "@/pages/classes/show.tsx";
+import {BookOpen, GraduationCap, Home, Users, Building} from 'lucide-react';
 
 function App() {
   return (
@@ -44,6 +47,17 @@ function App() {
                       meta: {label: 'Home', icon: <Home/>}
                   },
                   {
+                      name: 'users',
+                      list: '/users',
+                      meta: {label: 'Users', icon: <Users/>}
+                  },
+                  {
+                      name: 'departments',
+                      list: '/departments',
+                      create: '/departments/create',
+                      meta: {label: 'Departments', icon: <Building/>}
+                  },
+                  {
                       name:'subjects',
                       list: '/subjects',
                       create: '/subjects/create',
@@ -66,6 +80,15 @@ function App() {
 
                   }>
                       <Route path="/" element={<Dashboard/>} />
+
+                      <Route path="users">
+                          <Route index element={<UsersList/>}/>
+                      </Route>
+
+                      <Route path="departments">
+                          <Route index element={<DepartmentsList/>}/>
+                          <Route path="create" element={<DepartmentsCreate/>}/>
+                      </Route>
 
                       <Route path="subjects">
                           <Route index element={<SubjectsList/>}/>
