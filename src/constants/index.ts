@@ -22,6 +22,7 @@ export const ROLE_OPTIONS = [
 
 export const DEPARTMENTS = [
     "Computer Science",
+    "Electronics & Communication",
     "Mathematics",
     "Physics",
     "Chemistry",
