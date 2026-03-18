@@ -1,9 +1,15 @@
-import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@refinedev/react-hook-form";
+import { useBack, useList, type BaseRecord, type HttpError } from "@refinedev/core";
+import * as z from "zod";
+
+import { CreateView } from "@/components/refine-ui/views/create-view";
+import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Form,
     FormControl,
@@ -19,24 +25,38 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { CreateView } from "@/components/refine-ui/views/create-view";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
-import { useBack, useList } from "@refinedev/core";
-import { Loader2 } from "lucide-react";
-import { subjectSchema } from "@/lib/schema";
-import { Textarea } from "@/components/ui/textarea";
-import { z } from "zod";
-import { Department } from "@/types";
+import type { Department } from "@/types";
+
+const subjectCreateSchema = z.object({
+    departmentId: z.coerce
+        .number({
+            required_error: "Department is required",
+            invalid_type_error: "Department is required",
+        })
+        .min(1, "Department is required"),
+    name: z.string().min(3, "Subject name must be at least 3 characters"),
+    code: z.string().min(3, "Subject code must be at least 3 characters"),
+    description: z
+        .string()
+        .min(5, "Subject description must be at least 5 characters"),
+});
+
+type SubjectFormValues = z.infer<typeof subjectCreateSchema>;
 
 const SubjectsCreate = () => {
     const back = useBack();
 
-    const form = useForm({
-        resolver: zodResolver(subjectSchema),
+    const form = useForm<BaseRecord, HttpError, SubjectFormValues>({
+        resolver: zodResolver(subjectCreateSchema),
         refineCoreProps: {
             resource: "subjects",
             action: "create",
-            redirect: "list",
+        },
+        defaultValues: {
+            departmentId: 0,
+            name: "",
+            code: "",
+            description: "",
         },
     });
 
@@ -49,13 +69,15 @@ const SubjectsCreate = () => {
 
     const { query: departmentsQuery } = useList<Department>({
         resource: "departments",
-        pagination: { pageSize: 100 },
+        pagination: {
+            pageSize: 100,
+        },
     });
 
-    const departments = departmentsQuery.data?.data || [];
+    const departments = departmentsQuery.data?.data ?? [];
     const departmentsLoading = departmentsQuery.isLoading;
 
-    const onSubmit = async (values: z.infer<typeof subjectSchema>) => {
+    const onSubmit = async (values: SubjectFormValues) => {
         try {
             await onFinish(values);
         } catch (error) {
@@ -64,68 +86,57 @@ const SubjectsCreate = () => {
     };
 
     return (
-        <CreateView>
+        <CreateView className="class-view">
             <Breadcrumb />
-            <h1 className="page-title">Create Subject</h1>
+
+            <h1 className="page-title">Create a Subject</h1>
             <div className="intro-row">
-                <p>Add a new subject to a department.</p>
-                <Button variant="outline" onClick={() => back()}>Go Back</Button>
+                <p>Provide the required information below to add a subject.</p>
+                <Button onClick={() => back()}>Go Back</Button>
             </div>
-            <Separator className="my-4" />
-            <div className="flex justify-center">
-                <Card className="w-full max-w-2xl">
-                    <CardHeader>
-                        <CardTitle className="text-2xl font-bold">Subject Details</CardTitle>
+
+            <Separator />
+
+            <div className="my-4 flex items-center">
+                <Card className="class-form-card">
+                    <CardHeader className="relative z-10">
+                        <CardTitle className="text-2xl pb-0 font-bold text-gradient-orange">
+                            Fill out form
+                        </CardTitle>
                     </CardHeader>
-                    <CardContent>
+
+                    <Separator />
+
+                    <CardContent className="mt-7">
                         <Form {...form}>
-                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                                <FormField
-                                    control={control}
-                                    name="name"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Subject Name</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="e.g. Algorithms & Data Structures" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={control}
-                                    name="code"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Subject Code</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="e.g. CS201" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                                 <FormField
                                     control={control}
                                     name="departmentId"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Department</FormLabel>
+                                            <FormLabel>
+                                                Department <span className="text-orange-600">*</span>
+                                            </FormLabel>
                                             <Select
-                                                onValueChange={(value) => field.onChange(Number(value))}
-                                                value={field.value?.toString()}
+                                                onValueChange={(value) =>
+                                                    field.onChange(Number(value))
+                                                }
+                                                value={field.value ? String(field.value) : ""}
                                                 disabled={departmentsLoading}
                                             >
                                                 <FormControl>
-                                                    <SelectTrigger>
+                                                    <SelectTrigger className="w-full">
                                                         <SelectValue placeholder="Select a department" />
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    {departments.map((dept) => (
-                                                        <SelectItem key={dept.id} value={dept.id.toString()}>
-                                                            {dept.name}
+                                                    {departments.map((department) => (
+                                                        <SelectItem
+                                                            key={department.id}
+                                                            value={String(department.id)}
+                                                        >
+                                                            {department.name}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
@@ -134,28 +145,61 @@ const SubjectsCreate = () => {
                                         </FormItem>
                                     )}
                                 />
+
                                 <FormField
                                     control={control}
-                                    name="description"
+                                    name="name"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Description</FormLabel>
+                                            <FormLabel>
+                                                Subject Name <span className="text-orange-600">*</span>
+                                            </FormLabel>
                                             <FormControl>
-                                                <Textarea placeholder="Optional description..." {...field} />
+                                                <Input placeholder="Intro to Programming" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
-                                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                                    {isSubmitting ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Creating...
-                                        </>
-                                    ) : (
-                                        "Create Subject"
+
+                                <FormField
+                                    control={control}
+                                    name="code"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>
+                                                Subject Code <span className="text-orange-600">*</span>
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="CS101" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
                                     )}
+                                />
+
+                                <FormField
+                                    control={control}
+                                    name="description"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>
+                                                Description <span className="text-orange-600">*</span>
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="Describe the subject focus..."
+                                                    className="min-h-28"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <Button type="submit" size="lg" disabled={isSubmitting}>
+                                    {isSubmitting ? "Creating..." : "Create Subject"}
                                 </Button>
                             </form>
                         </Form>
