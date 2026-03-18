@@ -27,10 +27,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useBack, useList } from "@refinedev/core";
 import { Loader2 } from "lucide-react";
 import { classSchema } from "@/lib/schema";
+import UploadWidget from "@/components/upload-widget";
 import { Subject, User } from "@/types";
-import { z } from "zod";
-import UploadWidget from "@/components/ui/upload-widget.tsx";
-import {Label} from "@/components/ui/label.tsx";
+import z from "zod";
 
 const ClassesCreate = () => {
     const back = useBack();
@@ -135,7 +134,7 @@ const ClassesCreate = () => {
                                                             }
                                                             : null
                                                     }
-                                                    onChange={(file: any) => {
+                                                    onChange={(file) => {
                                                         if (file) {
                                                             field.onChange(file.url);
                                                             form.setValue("bannerCldPubId", file.publicId, {
